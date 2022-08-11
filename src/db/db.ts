@@ -12,7 +12,7 @@ export class Db {
     public async init() {
         const db = await open({
             driver: sqlite3.Database,
-            filename: `${this.dbPath}/tdl.db`
+            filename: `${this.dbPath}`
         });
         this.db = db;
     }
