@@ -14,8 +14,8 @@ test("create database", async () => {
 
     await db.write(`
         create table tasks (
-            id integer primary key autoincrement,
-            content text not null
+            id        integer  primary key autoincrement,
+            content   text     not null
         );
     `);
 
@@ -30,6 +30,7 @@ test("create database", async () => {
         select * from tasks
     `);
     expect(content.length).toBe(2);
+    console.log(content)
 
 });
 
