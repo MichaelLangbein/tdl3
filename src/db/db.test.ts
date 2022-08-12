@@ -9,7 +9,7 @@ test("create database", async () => {
     expect(db).toBeTruthy();
 
     await db.init();
-    const fileCreated = await fileExists("./tdl.db");
+    const fileCreated = await fileExists(dbPath);
     expect(fileCreated).toBeTruthy();
 
     await db.write(`
@@ -30,8 +30,9 @@ test("create database", async () => {
         select * from tasks
     `);
     expect(content.length).toBe(2);
-    console.log(content)
+    console.log(content);
 
+    await db.close();
 });
 
 

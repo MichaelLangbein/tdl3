@@ -3,12 +3,13 @@ import { Database, open } from "sqlite";
 
 
 export class Db {
-
-    // @ts-ignore
-    private db: Database;
-
+    
+    // @TODO: facilitate prepared statements
+    
+    private db!: Database;
+    
     constructor(private dbPath: string) {}
-
+    
     public async init() {
         const db = await open({
             driver: sqlite3.Database,
