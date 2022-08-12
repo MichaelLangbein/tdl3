@@ -1,8 +1,8 @@
 import { Db } from "./db";
-import { fileExists, removeFile } from "../files/files";
+import { fileExists, deleteFile } from "../files/files";
 
 
-const dbPath = "./test.db";
+const dbPath = "./tmp/test.db";
 
 test("create database", async () => {
     const db = new Db(dbPath);
@@ -30,12 +30,11 @@ test("create database", async () => {
         select * from tasks
     `);
     expect(content.length).toBe(2);
-    console.log(content);
 
     await db.close();
 });
 
 
 afterAll(async () => {
-    removeFile(dbPath);
+    await deleteFile(dbPath);
 });

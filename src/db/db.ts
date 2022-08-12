@@ -1,5 +1,6 @@
 import sqlite3 from "sqlite3";
 import { Database, open } from "sqlite";
+import { createDirIfNotExists, getPathTo } from '../files/files';
 
 
 export class Db {
@@ -11,6 +12,9 @@ export class Db {
     constructor(private dbPath: string) {}
     
     public async init() {
+        const path = getPathTo(this.dbPath);
+        await createDirIfNotExists(path);
+
         const db = await open({
             driver: sqlite3.Database,
             filename: `${this.dbPath}`

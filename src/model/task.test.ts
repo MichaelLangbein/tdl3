@@ -1,9 +1,9 @@
 import { Db } from '../db/db';
-import { removeFile } from '../files/files';
-import { Task, TaskService } from './taskService';
+import { deleteFile } from '../files/files';
+import { TaskService } from './taskService';
 
 
-const dbPath = "./tdl.db";
+const dbPath = "./tmp/tdl.db";
 
 test("Task service", async () => {
     const db = new Db(dbPath);
@@ -28,5 +28,5 @@ test("Task service", async () => {
 
 
 afterAll(async () => {
-    removeFile(dbPath);
+    await deleteFile(dbPath);
 });
