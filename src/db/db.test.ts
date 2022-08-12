@@ -15,9 +15,9 @@ test("create database", async () => {
     await db.run(`
         insert into tasks (content)
         values 
-            ("hello, world!"),
-            ("hi, mom!");
-    `);
+            (?),
+            (?);
+    `, ["hello, world!", "hi, mom!"]);
 
     const content = await db.all(`
         select * from tasks
