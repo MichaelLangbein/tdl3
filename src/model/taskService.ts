@@ -1,6 +1,4 @@
-import { Db } from '../db/db';
-
-
+import { Database } from 'sqlite';
 
 export interface Task {
     id: number,
@@ -10,15 +8,14 @@ export interface Task {
 export class TaskService {
     // @TODO: use prepared statements
 
-    constructor(private db: Db) {}
+    constructor(private db: Database) {}
 
     public async init() {
-        const tables = await this.db.read(`
+        const table = await this.db.get(`
             select name from sqlite_master where type='table' and name='tasks'
         `);
-        if (tables.length === 0) {
-            console.log('Initializing db schema ...')
-            await this.db.write(`
+        if (!table) {
+            await this.db.exec(`
                 create table tasks (
                     id          integer primary key autoincrement,
                     description text    not null
@@ -28,18 +25,25 @@ export class TaskService {
     }
     
     public async getTask(id: number) {
-        const results = await this.db.read(`
+        const result = await this.db.get(`
             select * from tasks where id = ${id};
         `);
-        console.log(results)
-        return results[0];
+        return result;
+    }
+
+    public async getLastInsertId() {
+        const result = await this.db.get(`SELECT last_insert_rowid()`);
+        return result['last_insert_rowid()'];
     }
 
     public async createTask(description: string) {
-        await this.db.write(`
+        await this.db.exec(`
             insert into tasks (description)
             values ("${description}");
         `);
+        const id = await this.getLastInsertId();
+        const task = await this.getTask(id);
+        return task;
     }
 
 }

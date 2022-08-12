@@ -1,32 +1,25 @@
-import { Db } from "./db";
-import { fileExists, deleteFile } from "../files/files";
+import { createDatabase } from './db';
 
-
-const dbPath = "./tmp/test.db";
 
 test("create database", async () => {
-    const db = new Db(dbPath);
+    const db = await createDatabase(':memory:');
     expect(db).toBeTruthy();
 
-    await db.init();
-    const fileCreated = await fileExists(dbPath);
-    expect(fileCreated).toBeTruthy();
-
-    await db.write(`
+    await db.run(`
         create table tasks (
             id        integer  primary key autoincrement,
             content   text     not null
         );
     `);
 
-    await db.write(`
+    await db.run(`
         insert into tasks (content)
         values 
             ("hello, world!"),
             ("hi, mom!");
     `);
 
-    const content = await db.read(`
+    const content = await db.all(`
         select * from tasks
     `);
     expect(content.length).toBe(2);
@@ -34,7 +27,3 @@ test("create database", async () => {
     await db.close();
 });
 
-
-afterAll(async () => {
-    await deleteFile(dbPath);
-});

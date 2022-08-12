@@ -1,38 +1,21 @@
-import sqlite3 from "sqlite3";
-import { Database, open } from "sqlite";
-import { createDirIfNotExists, getPathTo } from '../files/files';
+import { getPathTo, createDirIfNotExists } from '../files/files';
+import sqlite3 from 'sqlite3';
+import { Database, open } from 'sqlite';
 
 
-export class Db {
-    
-    // @TODO: facilitate prepared statements
-    
-    private db!: Database;
-    
-    constructor(private dbPath: string) {}
-    
-    public async init() {
-        const path = getPathTo(this.dbPath);
-        await createDirIfNotExists(path);
+/**
+ * @param dbPath: user ':memory:' for in-memory db
+ */
+export async function createDatabase(dbPath: string) {
 
-        const db = await open({
-            driver: sqlite3.Database,
-            filename: `${this.dbPath}`
-        });
-        this.db = db;
+    if (dbPath !== ':memory:') {
+        const path = getPathTo(dbPath);
+        createDirIfNotExists(path);
     }
-
-    public async close() {
-        await this.db.close();
-    }
-
-    public async write(sql: string) {
-        await this.db.exec(sql);
-    }
-
-    public async read(sql: string) {
-        const results = await this.db.all(sql);
-        return results;
-    }
-
+    
+    const db = await open({
+        driver: sqlite3.Database,
+        filename: dbPath,
+    });
+    return db;
 }

@@ -1,32 +1,26 @@
-import { Db } from '../db/db';
-import { deleteFile } from '../files/files';
+import { createDatabase } from '../db/db';
 import { TaskService } from './taskService';
 
 
-const dbPath = "./tmp/tdl.db";
-
 test("Task service", async () => {
-    const db = new Db(dbPath);
-    await db.init();
+    const db = await createDatabase(':memory:');
     const ts = new TaskService(db);
-
     expect(ts).toBeTruthy();
 
     await ts.init();
-    const tables = await db.read(`
-            select name from sqlite_master where type='table' and name='tasks'
+    const table = await db.get(`
+    select name from sqlite_master where type='table' and name='tasks'
     `);
-    expect(tables.length).toBe(1);
+    expect(table).toBeTruthy();
 
-    await ts.createTask("some task");
-    const task = await ts.getTask(1);
+    const task = await ts.createTask("some task");
     expect(task).toBeTruthy();
-    expect(task.description).toBe("some task");
+    const taskFetched = await ts.getTask(task.id);
+    expect(taskFetched).toBeTruthy();
+    expect(taskFetched.description).toBe("some task");
+
+
 
     await db.close();
 });
 
-
-afterAll(async () => {
-    await deleteFile(dbPath);
-});

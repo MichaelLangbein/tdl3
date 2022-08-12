@@ -32,7 +32,9 @@ export async function appendTextFile(filePath: string, data: string) {
 }
 
 export async function deleteFile(filePath: string) {
-    return await unlink(filePath);
+    if (fileExists(filePath)) {
+        await unlink(filePath);
+    }
 }
 
 export async function getFileAge(filePath: string): Promise<number> {
