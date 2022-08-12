@@ -1,11 +1,12 @@
 import { Database } from 'sqlite';
 
-export interface Task {
+export interface TaskTree {
     id: number,
     description: string,
-    parent: number | null,
-    children: Task[]
+    parent: TaskTree | null,
+    children: TaskTree[]
 }
+
 
 export class TaskService {
     // @TODO: use prepared statements
@@ -52,6 +53,7 @@ export class TaskService {
             const childIds = await this.getChildIds(id);
             for (const childId of childIds) {
                 const childTree = await this.getSubtree(childId, level - 1); // @TODO: do in parallel?
+                childTree.parent = root;
                 root.children.push(childTree);
             }
         }
@@ -85,23 +87,38 @@ export class TaskService {
         return task;
     }
     
-    public async updateTask(task: Task) {
+    public async updateTask(id: number, description: string, parentId: number) {
         await this.db.run(`
             update tasks
             set description = $description,
                 parent = $parent
             where id = $id
         `, {
-            '$id': task.id,
-            '$description': task.description,
-            '$parent': task.parent
+            '$id': id,
+            '$description': description,
+            '$parent': parentId
         });
-        const updatedTask = this.getTask(task.id);
+        const updatedTask = this.getTask(id);
         return updatedTask;
     }
 
-    public async deleteTree(taskId: number, recursive=true) {
+    public async deleteTask(taskId: number) {
+        await this.db.run(`
+            delete from tasks
+            where id = $id;
+        `, {
+            '$id': taskId
+        });
+    }
 
+    public async deleteTree(taskId: number, recursive=true) {
+        if (recursive) {
+            const childIds = await this.getChildIds(taskId);
+            for (const childId of childIds) {
+                await this.deleteTree(childId, recursive);
+            }
+        }
+        this.deleteTask(taskId);
     }
 
 }
