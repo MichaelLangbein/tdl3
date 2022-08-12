@@ -48,20 +48,6 @@ export class TaskService {
         return results.map(v => v.id);
     }
 
-    public async getSubtree(id: number, level: number = 0) {
-        const root = await this.getTask(id);
-        root.children = [];
-        if (level > 0) {
-            const childIds = await this.getChildIds(id);
-            for (const childId of childIds) {
-                const childTree = await this.getSubtree(childId, level - 1); // @TODO: do in parallel?
-                childTree.parent = root;
-                root.children.push(childTree);
-            }
-        }
-        return root;
-    }
-
     public async getLastInsertId() {
         const result = await this.db.get(`SELECT last_insert_rowid()`);
         return result['last_insert_rowid()'];
@@ -115,6 +101,20 @@ export class TaskService {
         `, {
             '$id': taskId
         });
+    }
+
+    public async getSubtree(id: number, level: number = 0): Promise<TaskTree> {
+        const root = await this.getTask(id);
+        root.children = [];
+        if (level > 0) {
+            const childIds = await this.getChildIds(id);
+            for (const childId of childIds) {
+                const childTree = await this.getSubtree(childId, level - 1); // @TODO: do in parallel?
+                childTree.parent = root;
+                root.children.push(childTree);
+            }
+        }
+        return root;
     }
 
     public async deleteTree(taskId: number, recursive=true) {
