@@ -6,7 +6,7 @@ import { Database, open } from 'sqlite';
 /**
  * @param dbPath: user ':memory:' for in-memory db
  */
-export async function createDatabase(dbPath: string) {
+export async function createDatabase(dbPath: ':memory:' | string) {
 
     if (dbPath !== ':memory:') {
         const path = getPathTo(dbPath);

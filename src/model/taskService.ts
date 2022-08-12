@@ -2,6 +2,7 @@ import { Database } from 'sqlite';
 
 export interface TaskTree {
     id: number,
+    title: string,
     description: string,
     parent: TaskTree | null,
     children: TaskTree[]
@@ -14,14 +15,15 @@ export class TaskService {
     constructor(private db: Database) {}
 
     public async init() {
-        const table = await this.db.get(`
+        const tasksTable = await this.db.get(`
             select name from sqlite_master where type='table' and name='tasks'
         `);
-        if (!table) {
+        if (!tasksTable) {
             await this.db.exec(`
                 create table tasks (
                     id          integer primary key autoincrement,
-                    description text    not null,
+                    title       text    not null,
+                    description text,
                     parent      integer
                 );
             `);
@@ -65,20 +67,22 @@ export class TaskService {
         return result['last_insert_rowid()'];
     }
 
-    public async createTask(description: string, parentId?: number) {
+    public async createTask(title: string, description: string, parentId: number | null) {
         if (parentId) {
             await this.db.run(`
-                insert into tasks (description, parent)
-                values ($description, $parent);
+                insert into tasks (title, description, parent)
+                values ($title, $description, $parent);
             `, {
+                "$title": title,
                 "$description": description,
                 "$parent": parentId
             });
         } else {
             await this.db.run(`
-                insert into tasks (description)
-                values ($description);
+                insert into tasks (title, description)
+                values ($title, $description);
             `, {
+                "$title": title,
                 "$description": description
             });
         }
@@ -87,14 +91,16 @@ export class TaskService {
         return task;
     }
     
-    public async updateTask(id: number, description: string, parentId: number) {
+    public async updateTask(id: number, title: string, description: string, parentId: number) {
         await this.db.run(`
             update tasks
-            set description = $description,
+            set title = $title,
+                description = $description,
                 parent = $parent
             where id = $id
         `, {
             '$id': id,
+            '$title': title,
             '$description': description,
             '$parent': parentId
         });
