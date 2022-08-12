@@ -2,7 +2,7 @@ import { Db } from "./db";
 import { fileExists, removeFile } from "../files/files";
 
 
-const dbPath = "./tdl.db";
+const dbPath = "./test.db";
 
 test("create database", async () => {
     const db = new Db(dbPath);

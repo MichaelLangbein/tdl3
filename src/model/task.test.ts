@@ -19,10 +19,11 @@ test("Task service", async () => {
     expect(tables.length).toBe(1);
 
     await ts.createTask("some task");
-    const tasks = await ts.getTask(1);
-    expect(tasks.length).toBe(1);
+    const task = await ts.getTask(1);
+    expect(task).toBeTruthy();
+    expect(task.description).toBe("some task");
 
-    db.close();
+    await db.close();
 });
 
 
