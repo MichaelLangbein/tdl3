@@ -82,7 +82,7 @@ describe("Task service", () => {
         await ts.addFileAttachment(task.id, "/some/file/path.txt");
         const tree = await ts.getSubtree(task.id);
         expect(tree.attachments[0].path).toBe("/some/file/path.txt");
-    })
+    });
 
 });
 
