@@ -8,7 +8,8 @@ export interface TaskTree {
     children: TaskTree[]
     created: Date,
     completed: Date | null,
-    secondsActive: number
+    secondsActive: number,
+    attachments: string[]
 }
 
 export interface TaskRow {
@@ -19,6 +20,12 @@ export interface TaskRow {
     created: Date,
     completed: Date | null,
     secondsActive: number
+}
+
+export interface FileRow {
+    id: number,
+    path: string,
+    taskId: number
 }
 
 
@@ -42,6 +49,19 @@ export class TaskService {
                     completed       Date,
                     secondsActive   integer
                 );
+            `);
+        }
+        const fileTable = await this.db.get(`
+            select name from sqlite_master where type='table' and name='files';
+        `);
+        if (!fileTable) {
+            await this.db.exec(`
+                create table files (
+                    id      integer primary key autoincrement,
+                    taskId  integer not null,
+                    path    char(500),
+                    foreign key (taskId) references tasks (id)
+                )
             `);
         }
     }
@@ -144,8 +164,20 @@ export class TaskService {
         });
     }
 
+
+    public async getFileAttachments(taskId: number): Promise<FileRow[]> {
+        const out = await this.db.all(`
+            select * from files
+            where taskId = $taskId;
+        `, {
+            '$taskId': taskId
+        });
+        return out;
+    }
+
     public async getSubtree(id: number, level: number = 0): Promise<TaskTree> {
         const root: any = await this.getTask(id);
+        root.attachments = await this.getFileAttachments(id);
         root.children = [];
         if (level > 0) {
             const childIds = await this.getChildIds(id);
