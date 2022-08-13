@@ -24,7 +24,9 @@ describe("Task service", () => {
         expect(task).toBeTruthy();
         const taskFetched = await ts.getTask(task.id);
         expect(taskFetched).toBeTruthy();
-        expect(taskFetched.title).toBe("some task");
+        if (taskFetched) {
+            expect(taskFetched.title).toBe("some task");
+        }
     
         const childTask = await ts.createTask("some child task", "", task.id);
         expect(childTask).toBeTruthy();
@@ -55,7 +57,7 @@ describe("Task service", () => {
     test("update", async () => {
         const task = await ts.createTask("some task", "", null);
         task.description = "new description";
-        const updatedTask = await ts.updateTask(task.id, task.title, task.description, task.parent);
+        const updatedTask = await ts.updateTask(task.id, task.title, task.description, task.parent, task.secondsActive);
 
         expect(updatedTask.description).toBe("new description");
     });
@@ -67,7 +69,7 @@ describe("Task service", () => {
         const child2 = await ts.createTask("child2", "", task.id);
         const grandChild = await ts.createTask("grandChild", "", child1.id);
         await ts.deleteTree(child1.id);
-
+        
         const tree = await ts.getSubtree(task.id, 2);
         expect(tree.children.length).toBe(1);
         expect(tree.children[0].id).toBe(child2.id);
