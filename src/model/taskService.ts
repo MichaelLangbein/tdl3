@@ -97,13 +97,13 @@ export class TaskService {
         return task!;
     }
     
-    public async updateTask(id: number, title: string, description: string, parentId: number, secondsActive: number, completed?: Date) {
+    public async updateTask(id: number, title: string, description: string, parentId: number | null, secondsActive: number, completed?: Date) {
         if (completed) {
             await this.db.run(`
             update tasks
             set title = $title,
                 description = $description,
-                parent = $parent,
+                ${parentId ? 'parent = $parent,' : ''}
                 secondsActive = $secondsActive,
                 completed = $completed
             where id = $id
