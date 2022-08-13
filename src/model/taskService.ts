@@ -9,7 +9,7 @@ export interface TaskTree {
     created: Date,
     completed: Date | null,
     secondsActive: number,
-    attachments: string[]
+    attachments: FileRow[]
 }
 
 export interface TaskRow {
@@ -175,6 +175,30 @@ export class TaskService {
         return out;
     }
 
+    public async addFileAttachment(taskId: number, path: string) {
+        await this.db.run(`
+            insert into files (path, taskId)
+            values ($path, $taskId);
+        `, {
+            '$taskId': taskId,
+            '$path': path
+        });
+    }
+
+    public async deleteFileAttachment(attachmentId: number) {
+        await this.db.run(`
+            delete from files
+            where id = $id
+        `, {
+            '$id': attachmentId
+        });
+    }
+
+
+    /*-----------------------------------------------------*
+     * Higher level methods
+     *-----------------------------------------------------*/
+
     public async getSubtree(id: number, level: number = 0): Promise<TaskTree> {
         const root: any = await this.getTask(id);
         root.attachments = await this.getFileAttachments(id);
@@ -199,5 +223,7 @@ export class TaskService {
         }
         this.deleteTask(taskId);
     }
+
+    public addAttachment() {}
 
 }

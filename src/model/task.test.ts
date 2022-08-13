@@ -76,6 +76,14 @@ describe("Task service", () => {
 
     });
 
+
+    test("attachments", async () => {
+        const task = await ts.createTask("base task", "", null);
+        await ts.addFileAttachment(task.id, "/some/file/path.txt");
+        const tree = await ts.getSubtree(task.id);
+        expect(tree.attachments[0].path).toBe("/some/file/path.txt");
+    })
+
 });
 
 
