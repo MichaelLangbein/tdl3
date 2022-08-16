@@ -20,6 +20,7 @@ export type levelChildDists = {[level: number]: ExponentialDistribution};
 
 
 export function estimate(node: Node, timesOnLevels: levelTimeDists, childrenOnLevels: levelChildDists): number {
+    // if we already know the answer, return it.
     if (node.complete) return fullTime(node);
 
     // if we're outside the range of available data ...
@@ -135,9 +136,19 @@ export function getNodeWithId(id: number, tree: Node): Node | undefined {
     return undefined;
 }
 
+function countCompletedNodes(tree: Node) {
+    let count = 0;
+    if (tree.complete) count += 1;
+    for (const child of tree.children) {
+        count += countCompletedNodes(child);
+    }
+    return count;
+}
+
 
 export function estimateTime(taskId: number, tree: TaskTree) {
     const nodeTree = parseTree(tree, 0)!;
+    if (countCompletedNodes(nodeTree) < 1) return 0;
     const { timesOnLevels, childrenOnLevels } = estimateDistributions(nodeTree);
     const node = getNodeWithId(taskId, nodeTree)!;
     const e = estimate(node, timesOnLevels, childrenOnLevels);

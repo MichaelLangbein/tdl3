@@ -30,11 +30,17 @@ describe("Top-down variable structure", () => {
             }]
         };
 
-        const node = getNodeWithId(1, nodeTree)!;
         const { timesOnLevels, childrenOnLevels } = estimateDistributions(nodeTree);
+        
+        // estimation of already completed task
+        const node = getNodeWithId(1, nodeTree)!;
         const e = estimate(node, timesOnLevels, childrenOnLevels);
+        expect(e).toEqual(nodeTree.children[0].time);
 
-        expect(e).toBeTruthy();
+        // estimation of not completed task
+        const node2 = getNodeWithId(0, nodeTree)!;
+        const e2 = estimate(node2, timesOnLevels, childrenOnLevels);
+        expect(e2).toBeGreaterThan(0.0);
     });
 
 });
