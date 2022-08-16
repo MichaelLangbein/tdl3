@@ -28,7 +28,8 @@ describe("Estimates", () => {
         const tree = await ts.getSubtree(parent.id, 2);
 
         const estimate = estimateTime(parent.id, tree);
-        // expect(estimate).toBeTruthy();
+        expect(estimate).toBeTruthy();
+        expect(estimate['tdvs']).toBeTruthy();
     })
 
 });
